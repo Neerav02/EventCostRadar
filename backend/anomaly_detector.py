@@ -35,8 +35,8 @@ class AnomalyDetector:
             self.model.fit(history_array)
             prediction = self.model.predict([[cpm]])
             
-            # Flag if both agree or if Z-score is extreme
-            is_anomaly = (prediction[0] == -1) or (z_score > 3.0)
+            # Flag if both agree or if Z-score is extreme, BUT only if cost is increasing (Z > 0)
+            is_anomaly = z_score > 0 and ((prediction[0] == -1) or (z_score > 3.0))
             
             if is_anomaly:
                 # Calculate blast radius (projected monthly overrun)
@@ -65,4 +65,6 @@ class AnomalyDetector:
             return "Cross-AZ traffic spike detected. Enable NAT Gateway caching or reroute to local AZ."
         elif service == "tesseractdb-query":
             return "High unoptimized query volume. Throttle non-critical analytics ingestion."
+        elif service == "intellinode-scorer":
+            return "Reduce inference frequency — cache emotion scores per user for 5 min. Current cost suggests repeated scoring of same user segments."
         return "Investigate application logs for errors."

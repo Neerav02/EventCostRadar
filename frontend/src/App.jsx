@@ -7,7 +7,20 @@ import AnomalyFeed from './components/AnomalyFeed';
 import RemediationPanel from './components/RemediationPanel';
 
 const App = () => {
-  const [dataHistory, setDataHistory] = useState([]);
+  const [dataHistory, setDataHistory] = useState(() => {
+    const initial = [];
+    const now = new Date();
+    for (let i = 15; i > 0; i--) {
+      const d = new Date(now.getTime() - i * 1000);
+      initial.push({ 
+        time: d.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second:'2-digit' }),
+        "push-delivery": 0, "push-delivery-cpm": 0,
+        "tesseractdb-query": 0, "tesseractdb-query-cpm": 0,
+        "intellinode-scorer": 0, "intellinode-scorer-cpm": 0
+      });
+    }
+    return initial;
+  });
   const [currentMetrics, setCurrentMetrics] = useState(null);
   const [anomalies, setAnomalies] = useState([]);
   const [isBurstMode, setIsBurstMode] = useState(false);
@@ -51,8 +64,22 @@ const App = () => {
       
       if (data.anomalies && data.anomalies.length > 0) {
         setAnomalies(prev => {
-          const newAnomalies = data.anomalies.map(a => ({ ...a, timestamp: timeStr }));
-          return [...newAnomalies, ...prev].slice(0, 10); // Keep last 10
+          const nowMs = Date.now();
+          let newAnomaliesToAdd = [];
+          
+          data.anomalies.forEach(a => {
+            const recentDuplicate = prev.find(p => 
+              p.service_name === a.service_name && 
+              p.addedAt && (nowMs - p.addedAt < 30000)
+            );
+            
+            if (!recentDuplicate) {
+              newAnomaliesToAdd.push({ ...a, timestamp: timeStr, addedAt: nowMs });
+            }
+          });
+          
+          if (newAnomaliesToAdd.length === 0) return prev;
+          return [...newAnomaliesToAdd, ...prev].slice(0, 10); // Keep last 10
         });
       }
     };
