@@ -64,7 +64,7 @@ class AnomalyDetector:
         if service == "push-delivery":
             return "Cross-AZ traffic spike detected. Enable NAT Gateway caching or reroute to local AZ."
         elif service == "tesseractdb-query":
-            return "High unoptimized query volume. Throttle non-critical analytics ingestion."
+            return "Analytics scan storm detected. Enable TesseractDB read replica routing for non-critical segments."
         elif service == "intellinode-scorer":
             return "Reduce inference frequency — cache emotion scores per user for 5 min. Current cost suggests repeated scoring of same user segments."
         return "Investigate application logs for errors."

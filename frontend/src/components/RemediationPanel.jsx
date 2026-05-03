@@ -29,6 +29,7 @@ const RemediationPanel = ({ activeAnomaly }) => {
         
         <div className="mt-auto">
           <motion.button 
+            onClick={() => window.open('https://console.aws.amazon.com/systems-manager/automation/execute', '_blank')}
             whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 240, 255, 0.2)' }}
             whileTap={{ scale: 0.98 }}
             className="w-full py-2 px-4 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 font-medium transition-colors"
